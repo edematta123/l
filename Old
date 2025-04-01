@@ -1,0 +1,111 @@
+Web VPython 3.2
+
+from vpython import *
+
+#Hi I'm Edwin's Code!
+
+#Constants:
+G = 6.67e-11
+mu=2e29
+earth =s2
+
+#Create Objects of Interest
+s1 = sphere(pos=vec(0,0,0), radius=7.e9, 
+            color=color.orange, make_trail=True, mass = 1e24)
+            
+s2 = sphere(pos=vec(1.49e11,0,0), radius=6.4e9, 
+            color=color.blue, make_trail=True, mass = 1e24)
+            
+r = s2.pos-s1.pos
+
+
+s2.v = vec(0,2.978e4, 0)
+s2.p = s2.mass*s2.v
+
+
+s1.p = -s2.p
+
+# Define work and KE for s1 and s2
+work = 0
+Ki = s1.p.mag2/(2*s1.mass) + s2.p.mag2/(2*s2.mass)
+Ui = -G*s1.mass*s2.mass/(r.mag)
+
+# Plotting Stuff:
+p_gr = graph(title='Momentum', xtitle = 't', ytitle = 'p(t)')
+
+epx = gcurve(graph=p_gr, color=color.blue)
+epy = gcurve(graph=p_gr, color=color.cyan)
+epz = gcurve(graph=p_gr, color=color.red)
+
+spx = gcurve(graph=p_gr, color=color.green)
+spy = gcurve(graph=p_gr, color=color.orange)
+spz = gcurve(graph=p_gr, color=color.yellow)
+
+#Work and Energy Plots
+
+w_gr = graph(title='Work', xtitle = 't', ytitle = 'W(t)')
+
+W = gcurve(graph=w_gr, color=color.blue)
+D_KE = gcurve(graph=w_gr, color=color.cyan)
+D_U = gcurve(graph=w_gr, color=color.red)
+
+e_gr = graph(title = 'Energy', xtitle= 't', ytitle = 'W(t)')
+
+KE = gcurve(graph=e_gr, color=color.green)
+U = gcurve(graph=e_gr, color=color.orange)
+E_tot = gcurve(graph=e_gr, color=color.yellow)
+
+er_gr = graph(title = 'Energy v Seperation Distance', xtitle= 'r', ytitle = 'E(r)')
+
+KE_r = gcurve(graph=er_gr, color=color.green)
+U_r = gcurve(graph=er_gr, color=color.orange)
+Er_tot = gcurve(graph=er_gr, color=color.yellow)
+
+tp_gr = graph(title='Total Momentum', xtitle = 't', ytitle = 'p(t)')
+
+tpx = gcurve(graph=tp_gr, color=color.blue)
+tpy = gcurve(graph=tp_gr, color=color.cyan)
+tpz = gcurve(graph=tp_gr, color=color.red)
+
+# "waitfor()" function waits for UI to engage with "click" from user
+scene.waitfor('click')
+
+old_vel = s2.v
+
+T=0
+t=0
+dt=24*60*30
+
+ while t < 2000*365*24*60*60: 
+     rate(2000) 
+     r = s2.pos - s1.pos 
+       
+     f_g = -g * s1.mass * s2.mass / r.mag2 * r.hat 
+       
+     # add f_rad for s1 and s2:
+     f1_rad = -mu * (f_g.mag/s1.mass)**2*s1.p.hat 
+     f2_rad = -mu * (f_g.mag/s2.mass)**2*s2.p.hat 
+       
+     s2.p += (f_g + f2_rad) * dt s2.v = s2.p/s2.mass 
+     s2.pos += s2.v * dt 
+     s1.p += (-f_g + f1_rad) * dt s1.v = s1.p/s1.mass 
+     s1.pos += s1.v * dt 
+       
+       #Update work 
+     work = work +f_g.dot(s1.v)*dt  +f_g.dot(s2.v)*dt 
+       #Calculate Kfs2 
+     Kf=Ki 
+       #Calculate Uf 
+     Uf=Ui tp = s1.p + s2.p
+   
+    
+    # add plot
+     W.plot(pos=(t,work))
+     D_KE.plot (pos = (t, Kf-Ki))
+     D_U.plot(pos = (t,Uf-Ui))
+   
+     KE.plot(pos=(t,Kf))
+     U.plot (pos = (t, Uf))
+     E_tot.plot(pos = (t,Uf+Kf))
+     
+     t+=dt
