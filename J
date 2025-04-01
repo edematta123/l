@@ -1,0 +1,141 @@
+Web VPython 3.2
+from vpython import *
+
+#Jermia Girgis
+#Lab 9
+
+
+#Constants
+g = 6.67e-11
+mu = 2e29
+
+#Objects of interest
+s1= sphere(pos=vec(-1.1e11,0,0), radius=7e9, color=color.yellow,
+            make_trail=True, mass=2e24)
+s2= sphere(pos=vec(1.49e11,0,0), radius=6.4e9, color=color.blue,
+            make_trail=True, mass=1e24)
+
+s2.v = vec(0, 10, 0)
+
+s2.p = s2.mass*s2.v
+s1.p = -s2.p
+
+#Plotting
+
+#Define work and KE for s1 and s2
+R = s2.pos - s1.pos
+work = 0
+Ki = s1.p.mag2/(2*s1.mass) + s2.p.mag2/(2*s2.mass)
+Ui = -g*s1.mass*s2.mass/R.mag
+
+#Poition plots
+p_gr = graph(title="Momentum", xtitle='t', ytitle='p(t)')
+
+epx=gcurve(graph=p_gr, color=color.blue)
+epy=gcurve(graph=p_gr, color=color.cyan)
+epz=gcurve(graph=p_gr, color=color.red)
+
+spx=gcurve(graph=p_gr, color=color.green)
+spy=gcurve(graph=p_gr, color=color.orange)
+spz=gcurve(graph=p_gr, color=color.yellow)
+
+#Velocity plots
+v_gr = graph(title="Total Momentum", xtitle='t', ytitle='v(t)')
+
+evx=gcurve(graph=v_gr, color=color.blue)
+evy=gcurve(graph=v_gr, color=color.cyan)
+evz=gcurve(graph=v_gr, color=color.red)
+
+svx=gcurve(graph=v_gr, color=color.green)
+svy=gcurve(graph=v_gr, color=color.orange)
+svz=gcurve(graph=v_gr, color=color.yellow)
+
+tp_gr = graph(title="Velocity", xtitle='t', ytitle='tp(t)')
+
+tpx=gcurve(graph=tp_gr, color=color.blue)
+tpy=gcurve(graph=tp_gr, color=color.cyan)
+tpz=gcurve(graph=tp_gr, color=color.red)
+
+#Work and energy plots
+w_gr = graph(title='Work', xtitle='t', ytitle='W(t)')
+w = gcurve(graph=w_gr, color=color.blue)
+d_ke = gcurve(graph=w_gr, color=color.purple)
+d_u = gcurve(graph=w_gr, color=color.red)
+
+e_gr = graph(title='Energy', xtitle='t', ytitle='E(t)')
+ke = gcurve(graph=e_gr, color=color.yellow)
+u = gcurve(graph=e_gr, color=color.orange)
+e_total = gcurve(graph=e_gr, color=color.magenta)
+
+er_gr = graph(title='Energy v. Seperation Distance', xtitle='R', ytitle='E(R)')
+ker = gcurve(graph=er_gr, color=color.yellow)
+ur = gcurve(graph=er_gr, color=color.orange)
+er_total = gcurve(graph=er_gr, color=color.magenta)
+
+
+old_vel = s2.v
+T=0
+
+t=0
+dt=24*60*60*30
+
+while t < 2000*365*24*60*60:
+    rate(2000)
+    r = s2.pos - s1.pos
+    F = -g * s1.mass * s2.mass / r.mag2 * r.hat
+    
+    s1_f_rad = -mu * (F.mag/s1.mass)**2 * s1.p.hat
+    s2_f_rad = -mu * (F.mag/s2.mass)**2 * s2.p.hat
+    
+    s2.p += (F + s2_f_rad) * dt
+    s2.v = s2.p/s2.mass
+    s2.pos += s2.v * dt
+    
+    s1.p += (-F + s1_f_rad) * dt
+    s1.v = s1.p/s1.mass
+    s1.pos += s1.v * dt
+    
+    #Update work
+    work = work + F.dot(s1.v) * dt + -F.dot(s2.v) * dt
+    
+    #Calculate Kfs2
+    Kf=Ki
+    
+    #Calculate Uf
+    Uf=Ui
+    
+    tp = s1.p + s2.p
+
+    epx.plot(pos=(t,s2.p.x))
+    epy.plot(pos=(t,s2.p.y))
+    epz.plot(pos=(t,s2.p.z))
+    
+    spx.plot(pos=(t,s1.p.x))
+    spy.plot(pos=(t,s1.p.y))
+    spz.plot(pos=(t,s1.p.z))
+    
+    evx.plot(pos=(t,s2.v.x))
+    evy.plot(pos=(t,s2.v.y))
+    evz.plot(pos=(t,s2.v.z))
+    
+    svx.plot(pos=(t,s1.v.x))
+    svy.plot(pos=(t,s1.v.y))
+    svz.plot(pos=(t,s1.v.z))
+    
+    tpx.plot(pos=(t,tp.x))
+    tpy.plot(pos=(t,tp.y))
+    tpz.plot(pos=(t,tp.z))
+    
+    #EXTRA THIS LAB
+    w.plot(pos=(t,work))
+    d_ke.plot(pos=(t,Kf-Ki))
+    d_u.plot(pos=(t,Uf-Ui))
+    
+    ke.plot(pos=(t, Kf))
+    u.plot(pos=(t, Uf))
+    e_total.plot(pos=(t, Kf+Uf))
+    
+    ker.plot(pos=(R.mag, Kf))
+    ur.plot(pos=(R.mag, Uf))
+    er_total.plot(pos=(R.mag, Kf+Uf))
+    
