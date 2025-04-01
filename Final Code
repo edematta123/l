@@ -1,0 +1,147 @@
+Web VPython 3.2
+from vpython import *
+
+# Hi I'm Edwin's Code
+
+
+#Constants
+g = 6.67e-11
+mu = 2e29
+
+#Objects of interest
+s1= sphere(pos=vec(-1.1e11,0,0), radius=7e9, color=color.orange,
+            make_trail=True, mass=2e24)
+s2= sphere(pos=vec(1.49e11,0,0), radius=6.4e9, color=color.blue,
+            make_trail=True, mass=1e24)
+
+s2.v = vec(0, 10, 0)
+
+s2.p = s2.mass*s2.v
+s1.p = -s2.p
+
+#Plotting
+
+#Define work and KE for s1 and s2
+R = s2.pos - s1.pos
+work = 0
+Ki = s1.p.mag2/(2*s1.mass) + s2.p.mag2/(2*s2.mass)
+Ui = -g*s1.mass*s2.mass/R.mag
+
+# Momentum Plots
+p_gr = graph(title='Momentum', xtitle='t', ytitle='p(t)')
+epx = gcurve(graph=p_gr, color=color.blue)
+epy = gcurve(graph=p_gr, color=color.cyan)
+epz = gcurve(graph=p_gr, color=color.red)
+spx = gcurve(graph=p_gr, color=color.green)
+spy = gcurve(graph=p_gr, color=color.orange)
+spz = gcurve(graph=p_gr, color=color.yellow)
+
+
+#Velocity plots
+v_gr = graph(title="Total Momentum", xtitle='t', ytitle='v(t)')
+
+evx=gcurve(graph=v_gr, color=color.blue)
+evy=gcurve(graph=v_gr, color=color.cyan)
+evz=gcurve(graph=v_gr, color=color.red)
+
+svx=gcurve(graph=v_gr, color=color.green)
+svy=gcurve(graph=v_gr, color=color.orange)
+svz=gcurve(graph=v_gr, color=color.yellow)
+
+tp_gr = graph(title="Velocity", xtitle='t', ytitle='tp(t)')
+
+tpx=gcurve(graph=tp_gr, color=color.blue)
+tpy=gcurve(graph=tp_gr, color=color.cyan)
+tpz=gcurve(graph=tp_gr, color=color.red)
+
+#Work and energy plots
+w_gr = graph(title='Work', xtitle='t', ytitle='W(t)')
+W = gcurve(graph=w_gr, color=color.blue)
+D_KE = gcurve(graph=w_gr, color=color.cyan)
+D_U = gcurve(graph=w_gr, color=color.red)
+
+e_gr = graph(title='Energy', xtitle='t', ytitle='W(t)')
+KE = gcurve(graph=e_gr, color=color.green)
+U = gcurve(graph=e_gr, color=color.orange)
+E_tot = gcurve(graph=e_gr, color=color.yellow)
+
+er_gr = graph(title='Energy vs Separation Distance', xtitle='r', ytitle='E(r)')
+KE_r = gcurve(graph=er_gr, color=color.green)
+U_r = gcurve(graph=er_gr, color=color.orange)
+Er_tot = gcurve(graph=er_gr, color=color.yellow)
+
+tp_gr = graph(title='Total Momentum', xtitle='t', ytitle='p(t)')
+tpx = gcurve(graph=tp_gr, color=color.blue)
+tpy = gcurve(graph=tp_gr, color=color.cyan)
+tpz = gcurve(graph=tp_gr, color=color.red)
+
+# "waitfor()" function waits for UI to engage with "click" from user
+scene.waitfor('click')
+
+
+old_vel = s2.v
+T=0
+
+t=0
+dt=24*60*60*30
+
+while t < 2000*365*24*60*60:
+    rate(2000)
+    r = s2.pos - s1.pos
+    f_g = -g * s1.mass * s2.mass / r.mag2 * r.hat
+    
+    f1_rad = -mu * (f_g.mag/s1.mass)**2 * s1.p.hat
+    f2_rad = -mu * (f_g.mag/s2.mass)**2 * s2.p.hat
+    
+    s2.p += (f_g + f2_rad) * dt
+    s2.v = s2.p/s2.mass
+    s2.pos += s2.v * dt
+    
+    s1.p += (-f_g + f1_rad) * dt
+    s1.v = s1.p/s1.mass
+    s1.pos += s1.v * dt
+    
+    #Update work
+    work = work + f_g.dot(s1.v) * dt + -f_g.dot(s2.v) * dt
+    
+   # Calculate final kinetic energy and potential energy
+    Kf = Ki
+    Uf = Ui
+    tp = s1.p + s2.p
+
+    epx.plot(pos=(t,s2.p.x))
+    epy.plot(pos=(t,s2.p.y))
+    epz.plot(pos=(t,s2.p.z))
+    
+    spx.plot(pos=(t,s1.p.x))
+    spy.plot(pos=(t,s1.p.y))
+    spz.plot(pos=(t,s1.p.z))
+    
+    evx.plot(pos=(t,s2.v.x))
+    evy.plot(pos=(t,s2.v.y))
+    evz.plot(pos=(t,s2.v.z))
+    
+    svx.plot(pos=(t,s1.v.x))
+    svy.plot(pos=(t,s1.v.y))
+    svz.plot(pos=(t,s1.v.z))
+    
+    tpx.plot(pos=(t,tp.x))
+    tpy.plot(pos=(t,tp.y))
+    tpz.plot(pos=(t,tp.z))
+    
+    
+    W.plot(pos=(t, work))
+    D_KE.plot(pos=(t, Kf - Ki))
+    D_U.plot(pos=(t, Uf - Ui))
+
+    KE.plot(pos=(t, Kf))
+    U.plot(pos=(t, Uf))
+    E_tot.plot(pos=(t, Uf + Kf))
+
+    KE_r.plot(pos=(r.mag, Kf))
+    U_r.plot(pos=(r.mag, Uf))
+    Er_tot.plot(pos=(r.mag, Kf + Uf))
+    
+
+  
+    t += dt
